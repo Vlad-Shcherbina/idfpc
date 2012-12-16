@@ -63,19 +63,16 @@ def render_page(x, y, vx, vy, clr=0):
   return result
 
 
-def parse_addr(addr):
-  """'70:79/18.26' -> (70, 79, 18, 26)"""
-  m = re.match(r'(\d+):(\d+)/(\d+)\.(\d+)', addr)
-  return map(int, m.groups())
+known_pages = {
+  (70, 79, 18, 26): 'pages/first.png',
+  (50, 22, 24, 34): 'pages/vvvm.png',
+  (41, 19, 37, 25): 'pages/vvvm2.png',
+}
 
 
 if __name__ == '__main__':
-  #addr, out_name = sys.argv[1:]
-  #render_page(*parse_addr(addr)).save(out_name)
-
   if not os.path.exists('pages'):
     os.mkdir('pages')
 
-  render_page(70, 79, 18, 26).save('pages/first.png')
-  render_page(50, 22, 24, 34).save('pages/vvvm.png')
-  render_page(41, 19, 37, 25).save('pages/vvvm2.png')
+  for addr, filename in known_pages.items():
+    render_page(*addr).save(filename)
