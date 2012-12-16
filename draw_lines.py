@@ -29,9 +29,13 @@ def signed_int8(x):
 pic = Image.open('pic.bmp')
 
 
+def get_abc(x, y):
+  c, b, a = map(signed_int8, pic.getpixel((x, y)))
+  return a, b, c
+
 def trace_lines(x, y, vx, vy, clr=0):
   while True:
-    c, b, a = map(signed_int8, pic.getpixel((x, y)))
+    a, b, c = get_abc(x, y)
 
     if a == b == c == 0:
       break
