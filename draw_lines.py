@@ -28,12 +28,9 @@ def signed_int8(x):
 
 pic = Image.open('pic.bmp')
 
-def render_page(x, y, vx, vy, clr=0):
-  result = Image.new('1', pic.size)
-  draw = ImageDraw.Draw(result)
 
+def trace_lines(x, y, vx, vy, clr=0):
   while True:
-    result.putpixel((x, y), clr)
     c, b, a = map(signed_int8, pic.getpixel((x, y)))
 
     if a == b == c == 0:
@@ -43,11 +40,25 @@ def render_page(x, y, vx, vy, clr=0):
     vy ^= b
     clr ^= c
 
-    if clr != 0:
-      draw.line((x, y, x+vx, y+vy), fill=1)
-
     x += vx
     y += vy
+
+    yield x, y, clr
+
+
+def render_page(x, y, vx, vy, clr=0):
+  result = Image.new('1', pic.size)
+  draw = ImageDraw.Draw(result)
+
+  prev_x = x
+  prev_y = y
+
+  for x, y, clr in trace_lines(x, y, vx, vy, clr):
+    if clr != 0:
+      draw.line((prev_x, prev_y, x, y), fill=1)
+
+    prev_x = x
+    prev_y = y
 
   return result
 
