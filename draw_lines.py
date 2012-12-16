@@ -14,6 +14,10 @@ produces
 ### Codeword: play
 """
 
+import sys
+import re
+import os
+
 import Image
 import ImageDraw
 
@@ -23,29 +27,44 @@ def signed_int8(x):
 
 
 pic = Image.open('pic.bmp')
-out = Image.new('L', pic.size)
-draw = ImageDraw.Draw(out)
+
+def render_page(x, y, vx, vy, clr=0):
+  result = Image.new('1', pic.size)
+  draw = ImageDraw.Draw(result)
+
+  while True:
+    result.putpixel((x, y), clr)
+    c, b, a = map(signed_int8, pic.getpixel((x, y)))
+
+    if a == b == c == 0:
+      break
+
+    vx ^= a
+    vy ^= b
+    clr ^= c
+
+    if clr != 0:
+      draw.line((x, y, x+vx, y+vy), fill=1)
+
+    x += vx
+    y += vy
+
+  return result
 
 
-x, y = 70, 79
-vx, vy = 18, 26
-clr = 0
+def parse_addr(addr):
+  """'70:79/18.26' -> (70, 79, 18, 26)"""
+  m = re.match(r'(\d+):(\d+)/(\d+)\.(\d+)', addr)
+  return map(int, m.groups())
 
-while True:
-  out.putpixel((x, y), clr)
-  c, b, a = map(signed_int8, pic.getpixel((x, y)))
 
-  if a == b == c == 0:
-    break
+if __name__ == '__main__':
+  #addr, out_name = sys.argv[1:]
+  #render_page(*parse_addr(addr)).save(out_name)
 
-  vx ^= a
-  vy ^= b
-  clr ^= c
+  if not os.path.exists('pages'):
+    os.mkdir('pages')
 
-  if clr != 0:
-    draw.line((x, y, x+vx, y+vy), fill=255)
-
-  x += vx
-  y += vy
-
-out.save('lines.png')
+  render_page(70, 79, 18, 26).save('pages/first.png')
+  render_page(50, 22, 24, 34).save('pages/vvvm.png')
+  render_page(41, 19, 37, 25).save('pages/vvvm2.png')
