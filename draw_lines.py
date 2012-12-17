@@ -47,7 +47,7 @@ def trace_lines(x, y, vx, vy, clr=0):
     x += vx
     y += vy
 
-    yield x, y, clr
+    yield x, y, vx, vy, clr
 
 
 def render_page(x, y, vx, vy, clr=0):
@@ -57,7 +57,7 @@ def render_page(x, y, vx, vy, clr=0):
   prev_x = x
   prev_y = y
 
-  for x, y, clr in trace_lines(x, y, vx, vy, clr):
+  for x, y, _, _, clr in trace_lines(x, y, vx, vy, clr):
     if clr != 0:
       draw.line((prev_x, prev_y, x, y), fill=1)
 
