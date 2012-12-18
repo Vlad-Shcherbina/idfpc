@@ -14,9 +14,9 @@ def decode_instr(instr):
 
 
 class VM(object):
-  def __init__(self, memory):
+  def __init__(self, memory, ip):
     self.memory = memory[:]
-    self.ip = 32
+    self.ip = ip
 
   def step(self):
     instr = self.memory[self.ip]
@@ -51,7 +51,6 @@ class VM(object):
         self.ip += self.memory[self.ip + 1] - d_ip
     elif opcode == 11:
       sys.stdout.write(chr(self.memory[self.ip + 1]))
-      #sys.stdout.flush()
     else:
       assert False, 'unrecognized opcode {} at {}'.format(opcode, self.ip)
 
@@ -78,7 +77,7 @@ if __name__ == '__main__':
   start = default_timer()
   n = 0
 
-  vm = VM(memory)
+  vm = VM(memory, 36)
   try:
     while True:
       vm.step()
