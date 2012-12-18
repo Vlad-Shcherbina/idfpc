@@ -1,6 +1,7 @@
-
 import re
 import struct
+import sys
+from timeit import default_timer
 
 MEMORY_SIZE = 13371111
 
@@ -20,12 +21,9 @@ class VM(object):
   def step(self):
     instr = self.memory[self.ip]
     opcode, d_ip = decode_instr(instr)
-    #print 'at {}: {}, +{}'.format(self.ip, opcode, d_ip)
     if 1 <= opcode <= 8:
-      #print '[{}, {}]'.format(self.memory[self.ip + 2], self.memory[self.ip + 3])
       op1 = self.memory[self.ip + self.memory[self.ip + 2]]
       op2 = self.memory[self.ip + 3]
-      #print 'op1 = {}, op2 = {}'.format(op1, op2)
       if opcode == 1:
         result = op1 + op2
       elif opcode == 2:
@@ -39,17 +37,24 @@ class VM(object):
       elif opcode == 6:
         result = op1 | op2
       elif opcode == 7:
-        result == op1 << op2
+        result = op1 << op2
       elif opcode == 8:
         result = op1 >> op2
       else:
         assert False
+      result = ((result + 0x80000000) & 0xFFFFFFFF) - 0x80000000
       self.memory[self.ip + self.memory[self.ip + 1]] = result
+    elif opcode == 9:
+      self.memory[self.ip + self.memory[self.ip + 1]] = ~self.memory[self.ip + 2]
+    elif opcode == 10:
+      if self.memory[self.ip + 2] < self.memory[self.ip + 3]:
+        self.ip += self.memory[self.ip + 1] - d_ip
     elif opcode == 11:
-      print '******', chr(self.memory[self.ip + 1])
-      #exit()
+      sys.stdout.write(chr(self.memory[self.ip + 1]))
+      #sys.stdout.flush()
     else:
       assert False, 'unrecognized opcode {} at {}'.format(opcode, self.ip)
+
     self.ip += d_ip
 
 
@@ -70,7 +75,19 @@ if __name__ == '__main__':
   memory = [0] * MEMORY_SIZE
   memory[:len(data_segment)] = data_segment
 
+  start = default_timer()
+  n = 0
+
   vm = VM(memory)
-  while True:
-    vm.step()
+  try:
+    while True:
+      vm.step()
+      n += 1
+      if n % 100000000 == 0:
+        sys.stdout.flush()
+        print>>sys.stderr, n / (default_timer() - start), 'steps per second'
+  finally:
+    sys.stdout.flush()
+    print>>sys.stderr, 'it took', default_timer() - start, 's'
+
 
