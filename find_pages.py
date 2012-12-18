@@ -57,6 +57,20 @@ def draw_char(draw, x, y, char):
     y += dy
 
 
+def trace_back(x, y, vx, vy, clr):
+  x0 = x - vx
+  y0 = y - vy
+
+  if x0 < 0 or x0 >= pic.size[0]:
+    return None
+  if y0 < 0 or y0 >= pic.size[1]:
+    return None
+
+  a, b, c = get_abc(x0, y0)
+  return x0, y0, vx^a, vy^b, clr^c
+  #pass
+
+
 def char_applies(x0, y0, char):
   x = x0
   y = y0
@@ -116,5 +130,11 @@ if __name__ == '__main__':
     os.mkdir('page_candidates')
 
   for i, q in enumerate(set(generated_by.values())):
+    while True:
+      q2 = trace_back(*q)
+      if q2 is None:
+        break
+      q = q2
+
     print 'rendering', i
     render_page(*q).save('page_candidates/page{:03}.png'.format(i))

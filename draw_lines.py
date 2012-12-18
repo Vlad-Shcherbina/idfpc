@@ -35,6 +35,11 @@ def get_abc(x, y):
 
 def trace_lines(x, y, vx, vy, clr=0):
   while True:
+    if x < 0 or x >= pic.size[0]:
+      break
+    if y < 0 or y >= pic.size[1]:
+      break
+
     a, b, c = get_abc(x, y)
 
     if a == b == c == 0:
